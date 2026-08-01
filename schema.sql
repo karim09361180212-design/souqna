@@ -1,0 +1,25 @@
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE TABLE IF NOT EXISTS users(
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(120) NOT NULL,
+ email VARCHAR(255) UNIQUE NOT NULL, phone VARCHAR(40), password_hash TEXT NOT NULL,
+ role VARCHAR(20) DEFAULT 'user', created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS categories(
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(), name VARCHAR(100) NOT NULL,
+ slug VARCHAR(100) UNIQUE NOT NULL, icon VARCHAR(20)
+);
+CREATE TABLE IF NOT EXISTS ads(
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+ category_id UUID REFERENCES categories(id), title VARCHAR(200) NOT NULL, description TEXT,
+ price NUMERIC(14,2) DEFAULT 0, city VARCHAR(100), image_urls JSONB DEFAULT '[]',
+ status VARCHAR(20) DEFAULT 'pending', featured BOOLEAN DEFAULT FALSE,
+ created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS favorites(
+ user_id UUID REFERENCES users(id) ON DELETE CASCADE, ad_id UUID REFERENCES ads(id) ON DELETE CASCADE,
+ created_at TIMESTAMPTZ DEFAULT NOW(), PRIMARY KEY(user_id,ad_id)
+);
+CREATE TABLE IF NOT EXISTS reports(
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES users(id),
+ ad_id UUID REFERENCES ads(id), reason TEXT, created_at TIMESTAMPTZ DEFAULT NOW()
+);
