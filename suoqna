@@ -1,0 +1,1326 @@
+README.md
+# سوقنا | Souqna
+
+منصة إعلانات مبوبة عربية حديثة تعمل من اليمين إلى اليسار RTL.
+
+## المميزات
+
+- واجهة عربية RTL
+- عرض الإعلانات
+- البحث عن الإعلانات
+- تصفية حسب الأقسام
+- إضافة إعلان جديد
+- تصميم متجاوب للجوال
+- دعم PWA
+- Backend API أولي
+- جاهز للربط مع Supabase
+
+## هيكل المشروع
+
+- frontend: واجهة المستخدم
+- backend: API باستخدام Node.js و Express
+- database: معلومات قاعدة البيانات
+- admin: لوحة الإدارة الأولية
+- docs: دليل النشر
+
+## تشغيل الواجهة
+
+```bash
+python -m http.server 8080 -d frontend
+
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+
+---
+
+# 2️⃣ فایل `frontend/index.html`
+
+مسیر:
+
+```text
+frontend/index.html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color"
+          content="#0f766e">
+
+    <meta name="description"
+          content="سوقنا - منصة عربية للإعلانات المبوبة">
+
+    <link rel="manifest"
+          href="manifest.json">
+
+    <link rel="stylesheet"
+          href="styles.css">
+
+    <title>سوقنا | سوق الإعلانات المبوبة</title>
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        سوقنا
+    </div>
+
+    <div class="top-actions">
+
+        <button id="loginBtn">
+            تسجيل الدخول
+        </button>
+
+        <button
+            class="primary"
+            id="postBtn">
+
+            + أضف إعلاناً
+
+        </button>
+
+    </div>
+
+</header>
+
+
+<main>
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>
+            كل ما تبحث عنه في سوقنا
+        </h1>
+
+        <p>
+            منصة عربية للإعلانات المبوبة للبيع والشراء بسهولة وأمان.
+        </p>
+
+    </div>
+
+
+    <div class="search-box">
+
+        <input
+            id="searchInput"
+            type="search"
+            placeholder="ابحث عن سيارة، عقار، هاتف...">
+
+        <select id="categoryFilter">
+
+            <option value="">
+                كل الأقسام
+            </option>
+
+        </select>
+
+        <button
+            id="searchBtn"
+            class="search-button">
+
+            بحث
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="section-header">
+
+        <h2>
+            الأقسام
+        </h2>
+
+        <span>
+            تصفح حسب القسم
+        </span>
+
+    </div>
+
+
+    <div
+        id="categories"
+        class="categories">
+
+    </div>
+
+</section>
+
+
+<section class="section">
+
+    <div class="section-header">
+
+        <h2>
+            أحدث الإعلانات
+        </h2>
+
+        <span id="listingCount">
+            0 إعلان
+        </span>
+
+    </div>
+
+
+    <div
+        id="listings"
+        class="listings-grid">
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- Add Listing Modal -->
+
+<div
+    id="listingModal"
+    class="modal hidden">
+
+    <div class="modal-card">
+
+        <button
+            id="closeModal"
+            class="close-button">
+
+            ×
+
+        </button>
+
+
+        <h2>
+            إضافة إعلان جديد
+        </h2>
+
+
+        <form id="listingForm">
+
+            <label>
+                عنوان الإعلان
+            </label>
+
+            <input
+                id="title"
+                required
+                placeholder="مثال: سيارة تويوتا للبيع">
+
+
+            <label>
+                وصف الإعلان
+            </label>
+
+            <textarea
+                id="description"
+                placeholder="اكتب تفاصيل الإعلان">
+
+            </textarea>
+
+
+            <label>
+                السعر
+            </label>
+
+            <input
+                id="price"
+                type="number"
+                placeholder="السعر">
+
+
+            <label>
+                المدينة
+            </label>
+
+            <input
+                id="city"
+                placeholder="الرياض">
+
+
+            <label>
+                القسم
+            </label>
+
+            <select
+                id="formCategory">
+
+            </select>
+
+
+            <label>
+                رابط الصورة
+            </label>
+
+            <input
+                id="image"
+                type="url"
+                placeholder="https://example.com/image.jpg">
+
+
+            <button
+                type="submit"
+                class="primary submit-button">
+
+                نشر الإعلان
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script src="app.js"></script>
+
+</body>
+
+</html>
+frontend/styles.css
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Tahoma, sans-serif;
+    background: #f5f7f6;
+    color: #17211f;
+}
+
+.topbar {
+    height: 68px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e9e7;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 7%;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 10;
+}
+
+.brand {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0f766e;
+}
+
+.top-actions {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+
+    padding: 11px 18px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+.primary {
+    background: #0f766e;
+    color: white;
+}
+
+.hero {
+    padding: 55px 7%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0f766e,
+            #155e75
+        );
+
+    color: white;
+}
+
+.hero h1 {
+    font-size: 38px;
+    margin: 0 0 10px;
+}
+
+.hero p {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.search-box {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        190px
+        100px;
+
+    gap: 10px;
+
+    margin-top: 30px;
+}
+
+.search-box input,
+.search-box select {
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 14px;
+
+    font-size: 15px;
+}
+
+.search-button {
+    background: white;
+    color: #0f766e;
+}
+
+.section {
+    padding: 30px 7%;
+}
+
+.section-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-header span {
+    color: #71807b;
+}
+
+.categories {
+    display: flex;
+
+    gap: 12px;
+
+    overflow-x: auto;
+
+    padding: 15px 0;
+}
+
+.category-card {
+    min-width: 130px;
+
+    background: white;
+
+    border: 1px solid #e7ecea;
+
+    border-radius: 16px;
+
+    padding: 18px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+}
+
+.category-icon {
+    font-size: 30px;
+
+    margin-bottom: 8px;
+}
+
+.listings-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(220px, 1fr)
+        );
+
+    gap: 18px;
+}
+
+.listing-card {
+    background: white;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+
+    border: 1px solid #e8ecea;
+
+    box-shadow:
+        0 4px 16px
+        rgba(0, 0, 0, 0.05);
+}
+
+.listing-card img {
+    width: 100%;
+
+    height: 170px;
+
+    object-fit: cover;
+
+    background: #e9efed;
+}
+
+.listing-body {
+    padding: 15px;
+}
+
+.listing-title {
+    margin-top: 0;
+}
+
+.price {
+    font-size: 19px;
+
+    font-weight: bold;
+
+    color: #0f766e;
+}
+
+.muted {
+    color: #71807b;
+
+    font-size: 13px;
+}
+
+.modal {
+    position: fixed;
+
+    inset: 0;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    display: grid;
+
+    place-items: center;
+
+    padding: 20px;
+
+    z-index: 20;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal-card {
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 25px;
+
+    width:
+        min(
+            520px,
+            100%
+        );
+
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+
+    left: 15px;
+
+    top: 10px;
+
+    background: none;
+
+    font-size: 28px;
+}
+
+#listingForm {
+    display: grid;
+
+    gap: 10px;
+}
+
+#listingForm input,
+#listingForm textarea,
+#listingForm select {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 1px solid #dfe6e3;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+}
+
+#listingForm textarea {
+    min-height: 100px;
+}
+
+.submit-button {
+    margin-top: 10px;
+}
+
+
+@media (max-width: 700px) {
+
+    .search-box {
+        grid-template-columns: 1fr;
+    }
+
+    .hero h1 {
+        font-size: 29px;
+    }
+
+    .topbar {
+        padding: 0 4%;
+    }
+
+    .top-actions button:first-child {
+        display: none;
+    }
+
+}
+frontend/app.js
+const categories = [
+
+    ["سيارات", "cars", "🚗"],
+
+    ["عقارات", "real-estate", "🏠"],
+
+    ["موبايلات", "phones", "📱"],
+
+    ["إلكترونيات", "electronics", "💻"],
+
+    ["خدمات", "services", "🛠️"],
+
+    ["وظائف", "jobs", "💼"],
+
+    ["ملابس وأزياء", "fashion", "👕"],
+
+    ["أخرى", "other", "📦"]
+
+];
+
+
+let listings =
+    JSON.parse(
+        localStorage.getItem(
+            "souqna_listings"
+        ) || "[]"
+    );
+
+
+const $ = id =>
+    document.getElementById(id);
+
+
+function setupCategories() {
+
+    const options =
+        categories
+            .map(
+                category =>
+
+                `<option value="${category[1]}">
+                    ${category[0]}
+                </option>`
+
+            )
+            .join("");
+
+
+    $("categoryFilter").innerHTML =
+        `<option value="">
+            كل الأقسام
+        </option>`
+        +
+        options;
+
+
+    $("formCategory").innerHTML =
+        `<option value="">
+            اختر القسم
+        </option>`
+        +
+        options;
+
+
+    $("categories").innerHTML =
+
+        categories
+            .map(
+                category =>
+
+                `<div
+                    class="category-card"
+                    onclick="filterCategory('${category[1]}')">
+
+                    <div class="category-icon">
+                        ${category[2]}
+                    </div>
+
+                    <b>
+                        ${category[0]}
+                    </b>
+
+                </div>`
+
+            )
+            .join("");
+
+}
+
+
+function filterCategory(category) {
+
+    $("categoryFilter").value =
+        category;
+
+    renderListings();
+
+}
+
+
+function renderListings() {
+
+    const query =
+        $("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const category =
+        $("categoryFilter")
+            .value;
+
+
+    const filtered =
+        listings.filter(
+            item =>
+
+            (
+                !query ||
+
+                (
+                    item.title
+                    +
+                    item.description
+                    +
+                    item.city
+                )
+                .toLowerCase()
+                .includes(query)
+
+            )
+
+            &&
+
+            (
+                !category
+                ||
+                item.category === category
+            )
+
+        );
+
+
+    $("listingCount")
+        .textContent =
+        `${filtered.length} إعلان`;
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        $("listings").innerHTML =
+
+            `<p>
+                لا توجد إعلانات مطابقة حالياً.
+            </p>`;
+
+        return;
+
+    }
+
+
+    $("listings").innerHTML =
+
+        filtered
+            .map(
+                item =>
+
+                `<article class="listing-card">
+
+                    <img
+                        src="${
+                            item.image
+                            ||
+                            'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800'
+                        }"
+                        alt="${item.title}">
+
+                    <div class="listing-body">
+
+                        <h3 class="listing-title">
+                            ${item.title}
+                        </h3>
+
+                        <div class="price">
+
+                            ${
+                                item.price
+
+                                ?
+
+                                Number(
+                                    item.price
+                                )
+                                .toLocaleString(
+                                    "ar-SA"
+                                )
+                                +
+                                " ريال"
+
+                                :
+
+                                "السعر عند التواصل"
+                            }
+
+                        </div>
+
+                        <p class="muted">
+
+                            ${
+                                item.city
+                                ||
+                                "الموقع غير محدد"
+                            }
+
+                            ·
+
+                            ${
+                                item.categoryName
+                                ||
+                                "أخرى"
+                            }
+
+                        </p>
+
+                        <p>
+                            ${
+                                item.description
+                                ||
+                                ""
+                            }
+                        </p>
+
+                    </div>
+
+                </article>`
+
+            )
+            .join("");
+
+}
+
+
+$("searchBtn")
+    .onclick =
+    renderListings;
+
+
+$("searchInput")
+    .oninput =
+    renderListings;
+
+
+$("categoryFilter")
+    .onchange =
+    renderListings;
+
+
+$("postBtn")
+    .onclick = () => {
+
+        $("listingModal")
+            .classList
+            .remove("hidden");
+
+    };
+
+
+$("closeModal")
+    .onclick = () => {
+
+        $("listingModal")
+            .classList
+            .add("hidden");
+
+    };
+
+
+$("loginBtn")
+    .onclick = () => {
+
+        alert(
+            "سيتم ربط تسجيل الدخول مع Supabase Auth في المرحلة التالية."
+        );
+
+    };
+
+
+$("listingForm")
+    .onsubmit = event => {
+
+        event.preventDefault();
+
+
+        const category =
+            $("formCategory")
+                .value;
+
+
+        const categoryInfo =
+            categories.find(
+                item =>
+                    item[1] === category
+            );
+
+
+        const newListing = {
+
+            title:
+                $("title").value,
+
+            description:
+                $("description").value,
+
+            price:
+                $("price").value,
+
+            city:
+                $("city").value,
+
+            category:
+
+                category
+                ||
+                "other",
+
+            categoryName:
+
+                categoryInfo
+                ?
+                categoryInfo[0]
+                :
+                "أخرى",
+
+            image:
+                $("image").value
+
+        };
+
+
+        listings.unshift(
+            newListing
+        );
+
+
+        localStorage.setItem(
+            "souqna_listings",
+
+            JSON.stringify(
+                listings
+            )
+        );
+
+
+        event.target.reset();
+
+
+        $("listingModal")
+            .classList
+            .add("hidden");
+
+
+        renderListings();
+
+    };
+
+
+setupCategories();
+
+renderListings();
+
+
+if (
+    "serviceWorker"
+    in navigator
+) {
+
+    navigator.serviceWorker
+        .register(
+            "sw.js"
+        );
+
+}
+frontend/manifest.json
+{
+  "name": "سوقنا",
+  "short_name": "سوقنا",
+  "description": "منصة عربية للإعلانات المبوبة",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f6",
+  "theme_color": "#0f766e",
+  "lang": "ar",
+  "dir": "rtl"
+}
+frontend/sw.js
+const CACHE_NAME =
+    "souqna-v1";
+
+
+const FILES = [
+
+    "./",
+
+    "./index.html",
+
+    "./styles.css",
+
+    "./app.js",
+
+    "./manifest.json"
+
+];
+
+
+self.addEventListener(
+    "install",
+    event => {
+
+        event.waitUntil(
+
+            caches.open(
+                CACHE_NAME
+            )
+            .then(
+                cache =>
+
+                cache.addAll(
+                    FILES
+                )
+
+            )
+
+        );
+
+    }
+);
+
+
+self.addEventListener(
+    "fetch",
+    event => {
+
+        event.respondWith(
+
+            caches
+                .match(
+                    event.request
+                )
+
+                .then(
+                    cached =>
+
+                    cached
+                    ||
+                    fetch(
+                        event.request
+                    )
+
+                )
+
+        );
+
+    }
+);
+backend/package.json
+{
+  "name": "souqna-api",
+  "version": "1.0.0",
+  "description": "Souqna Arabic Classifieds API",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "pg": "^8.12.0"
+  }
+}
+backend/server.js
+import express from "express";
+
+import cors from "cors";
+
+import dotenv from "dotenv";
+
+
+dotenv.config();
+
+
+const app =
+    express();
+
+
+app.use(
+    cors()
+);
+
+
+app.use(
+    express.json()
+);
+
+
+app.get(
+    "/api/health",
+
+    (req, res) => {
+
+        res.json({
+
+            ok: true,
+
+            service:
+                "Souqna API",
+
+            message:
+                "سوقنا API يعمل بنجاح"
+
+        });
+
+    }
+
+);
+
+
+app.get(
+    "/api/config",
+
+    (req, res) => {
+
+        res.json({
+
+            supabaseUrl:
+                process.env
+                    .SUPABASE_URL
+                ||
+                null
+
+        });
+
+    }
+
+);
+
+
+const PORT =
+    process.env.PORT
+    ||
+    3000;
+
+
+app.listen(
+
+    PORT,
+
+    () => {
+
+        console.log(
+
+            `Souqna API running on port ${PORT}`
+
+        );
+
+    }
+
+);
+backend/.env.example
+PORT=3000
+
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
+
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+database/README.md
+# قاعدة بيانات سوقنا
+
+قاعدة بيانات سوقنا تستخدم PostgreSQL عبر Supabase.
+
+## الجداول الأساسية
+
+- profiles
+- categories
+- listings
+- listing_images
+- favorites
+- messages
+- reports
+
+## Authentication
+
+يتم استخدام Supabase Auth لتسجيل المستخدمين.
+
+## Storage
+
+سيتم استخدام Supabase Storage لحفظ صور الإعلانات.
+
+## الأمان
+
+يجب استخدام Row Level Security (RLS).
+
+لا يجب نشر:
+
+- Service Role Key
+- كلمات المرور
+- مفاتيح سرية
+- ملفات .env
+
+## الحالة
+
+تم إعداد قاعدة البيانات الأساسية في مشروع Supabase.
+
+المرحلة التالية هي ربط Frontend مباشرة مع Supabase.
+admin/README.md
+docs/DEPLOYMENT.md
+# دليل نشر سوقنا
+
+## 1. قاعدة البيانات
+
+قاعدة البيانات موجودة في Supabase.
+
+يتم استخدام:
+
+- PostgreSQL
+- Supabase Auth
+- Supabase Storage
+
+---
+
+## 2. GitHub
+
+يجب أن يكون هيكل المشروع:
+
+souqna/
+├── frontend/
+├── backend/
+├── database/
+├── admin/
+├── docs/
+└── README.md
+
+---
+
+## 3. Frontend
+
+يمكن نشر مجلد frontend باستخدام:
+
+- Cloudflare Pages
+- GitHub Pages
+- Vercel
+
+---
+
+## 4. Backend
+
+يمكن نشر مجلد backend باستخدام:
+
+- Render
+- Railway
+
+---
+
+## 5. Environment Variables
+
+يجب إضافة متغيرات البيئة في منصة الاستضافة.
+
+مثال:
+
+PORT=3000
+
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+
+SUPABASE_ANON_KEY=YOUR_ANON_KEY
+
+DATABASE_URL=YOUR_DATABASE_URL
+
+---
+
+## 6. الأمان
+
+لا ترفع ملف:
+
+.env
+
+إلى GitHub.
+
+لا تضع:
+
+SUPABASE_SERVICE_ROLE_KEY
+
+داخل Frontend.
+
+لا تشارك كلمات المرور أو مفاتيح قاعدة البيانات.
+
+---
+
+## 7. الحالة الحالية
+
+النسخة الحالية هي MVP.
+
+الواجهة تعمل محلياً وتستخدم localStorage لتخزين الإعلانات.
+
+قبل الإطلاق التجاري يجب ربط:
+
+- Supabase Auth
+- Supabase Database
+- Supabase Storage
+- نظام الرسائل
+- المفضلة
+- لوحة الإدارة
